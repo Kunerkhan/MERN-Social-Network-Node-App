@@ -1,8 +1,6 @@
+require('dotenv').config();
 const _ = require("lodash");
 const { sendEmail } = require("../helpers");
-// load env
-const dotenv = require("dotenv");
-dotenv.config();
 const jwt = require("jsonwebtoken");
 const expressJwt = require('express-jwt');
 const User = require("../models/user");
@@ -57,7 +55,7 @@ exports.signOut = (req, res) => {
 exports.requireSignIn = expressJwt({
     // if the token is valid, express-jwt appends the verified userId
     // in an auth key to the request object
-    secret: process.env.JWT_SECRET,
+    secret: process.env.JWT_SECRET || "KHKDLSAHFLK092859340JKHFDSLKHJ",
     algorithms: ["HS256"], // added later
     userProperty: "auth",
 });

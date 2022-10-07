@@ -1,9 +1,10 @@
 {
   "name": "node-api",
   "version": "1.0.0",
-  "description": "Network backendn",
+  "description": "Network backend",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "dev": "nodemon app.js"
   },
   "author": "Akela",
