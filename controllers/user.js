@@ -21,13 +21,18 @@ exports.getUserById = (req, res, next, userId) => {
 };
 
 exports.hasAuthorization = (req, res, next) => {
-    const authorized = req.profile && req.auth && req.profile._id === req.auth._id;
+    let sameUser = req.profile && req.auth && req.profile._id == req.auth._id;
+    let adminUser = req.profile && req.auth && req.auth.role === 'admin';
+    console.log(req.auth);
+    const authorized = sameUser || adminUser;
     if(!authorized)
     {
         return res.status(403).json({
             error: "User is not authorized to perfom this action"
         })
     }
+
+    next();
 }
 
 exports.getAllUsers = (req, res) => {
@@ -38,7 +43,7 @@ exports.getAllUsers = (req, res) => {
         }
 
         res.json({ users });
-    }).select("name email created updated")
+    }).select("name email created updated role")
 }
 
 exports.getUser = (req, res) => {
@@ -102,6 +107,8 @@ exports.updateUser = (req, res, next) => {
 
 exports.deleteUser = (req, res) => {
     let user = req.profile;
+
+    console.log(user);
     user.remove((error, user) => {
         if(error)
         {
