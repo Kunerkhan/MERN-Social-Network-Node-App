@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const uuidv1 = require("uuidv1");
 const crypto = require("crypto");
 const { ObjectId } = mongoose.Schema;
+const Post = require("./post");
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -83,5 +84,22 @@ userSchema.methods = {
         }
     } 
 }
+
+// pre middleware
+userSchema.pre("remove", function (next) {
+    Post.remove({ postedBy: this._id }).exec();
+    next();
+  });
+  // remove comments if user is deleted
+  // https://www.udemy.com/instructor/communication/qa/12584122/detail/
+  userSchema.pre("remove", async function (next) {
+    await Post.remove({ postedBy: this._id }).exec();
+    await Post.updateMany(
+      {},
+      { $pull: { comments: { postedBy: this._id } } },
+      { new: true, multi: true }
+    ).exec();
+    next();
+  });
 
 module.exports = mongoose.model("User", userSchema);

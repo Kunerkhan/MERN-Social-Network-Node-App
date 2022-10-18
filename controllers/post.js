@@ -22,20 +22,32 @@ exports.postById = (req, res, next, id) => {
 };
 
 
-exports.getPosts = (req, res) => {
-    const result = Post.find()
-        .populate("postedBy", "_id name")
-        .populate("comments.postedBy", "_id name")
-        .populate("postedBy", "_id name")
-        .select("_id title body created photo likes comments")
-        .sort({ created: -1 })
-        .then(posts => {
-            res.json({
-                posts,
-            });
-        })
-        .catch(err => console.log(err));
-};
+exports.getPosts = async (req, res) => {
+    // get current page from req.query or use default value of 1
+    const currentPage = req.query.page || 1;
+    // return 3 posts per page
+    const perPage = 6;
+    let totalItems;
+  
+    const posts = await Post.find()
+      // countDocuments() gives you total count of posts
+      .countDocuments({})
+      .then((count) => {
+        totalItems = count;
+        return Post.find()
+          .skip((currentPage - 1) * perPage)
+          .populate("postedBy", "_id name")
+          .populate("comments", "text created")
+          .populate("comments.postedBy", "_id name")
+          .select("_id title body created likes photo comments")
+          .limit(perPage)
+          .sort({ created: -1 });
+      })
+      .then((posts) => {
+        res.status(200).json(posts);
+      })
+      .catch((err) => console.log(err));
+  };
 
 exports.createPost = (req, res, next) => {
     let form = new formidable.IncomingForm({ keepExtensions: true });
